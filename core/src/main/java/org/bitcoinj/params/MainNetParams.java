@@ -58,9 +58,19 @@ public class MainNetParams extends AbstractBitcoinNetParams {
         // transactions are handled. Duplicated transactions could occur in the case where a coinbase had the same
         // extraNonce and the same outputs but appeared at different heights, and greatly complicated re-org handling.
         // Having these here simplifies block connection logic considerably.
-        checkpoints.put(100, Sha256Hash.wrap("1922dff2ecb45285dba32fca0ea25ece9c539d31c23f7021b730b875ced7c7b8"));
-         checkpoints.put(153216, Sha256Hash.wrap("99b5bc279aa2a6680566dc3815ef444a5d078abedde43614d64009c0ac7caa0d"));
-        //needmore please add here.
+        checkpoints.put(   100, Sha256Hash.wrap("1922dff2ecb45285dba32fca0ea25ece9c539d31c23f7021b730b875ced7c7b8"));
+        checkpoints.put(  2016, Sha256Hash.wrap("94a9ab39b9e1e7dafdda1a5823c11556750157aa16e93ae2a59de426e185de58"));
+        checkpoints.put(  4032, Sha256Hash.wrap("a29010ca0ec82b0d2d937f5d82d2e30918467b1f4b3bb51026d13782b7aac73a"));
+        checkpoints.put(  8064, Sha256Hash.wrap("76ef2061b587842f424aae28fcab25fb8434612b58125258292799aaaed0f833"));
+        checkpoints.put( 12096, Sha256Hash.wrap("5abe39584788a018296d97a6f00ca80c81603ebbe8ad84af5778e7d6fcdbed70"));
+        checkpoints.put( 13422, Sha256Hash.wrap("c70a40fe1c53e5525636644e625d4c38c8493b180a0ca81c9d7c9801748e6b52"));
+        checkpoints.put( 14496, Sha256Hash.wrap("d50a2656a6ac593ebb034c1d5ca5eac93220455727f677e7506629f61d566239"));
+        checkpoints.put( 15809, Sha256Hash.wrap("31cdc96eb5510e69bf2635b76b0266c0065839685bb30d9b94224d9a5c972b78"));
+        checkpoints.put( 15882, Sha256Hash.wrap("bfbbf161974b59797b5698b086fd8a5efab4786a3cee389d130da20e03d65eaf"));
+        checkpoints.put( 30800, Sha256Hash.wrap("3a767fc61883f7d5adfd2b07c810ec4b065812dd40aafbda1944f8f792e2c00a"));
+        checkpoints.put( 66138, Sha256Hash.wrap("8f4074d04838fb1d0914d46ee35de8b1e069f70df97e207617210469d1ebcf7e"));
+        checkpoints.put( 68900, Sha256Hash.wrap("e0bef613116487194c2c823110d9b4d630ccd33d186b9dc12db03c03ae21c958"));
+        checkpoints.put(153216, Sha256Hash.wrap("99b5bc279aa2a6680566dc3815ef444a5d078abedde43614d64009c0ac7caa0d"));
 
         dnsSeeds = new String[] {
                 "dobbscoin.info",
