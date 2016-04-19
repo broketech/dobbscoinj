@@ -32,7 +32,8 @@ public class MainNetParams extends AbstractBitcoinNetParams {
         super();
         interval = INTERVAL;
         targetTimespan = TARGET_TIMESPAN;
-        maxTarget = Utils.decodeCompactBits(0x1e0ffff0L);// this is little bit confusing, i beg to btcbob but no one give me info.
+        // maxTarget = Utils.decodeCompactBits(0x1e0ffff0L);// this is little bit confusing, i beg to btcbob but no one give me info.
+        maxTarget = Utils.decodeCompactBits(0x1e0fffffL); // bnProofOfWorkLimit = ~uint256(0) >> 20;
         dumpedPrivateKeyHeader = 128;
         addressHeader = 0;
         p2shHeader = 5;
