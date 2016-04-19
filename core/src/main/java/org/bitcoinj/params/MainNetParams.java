@@ -71,7 +71,6 @@ public class MainNetParams extends AbstractBitcoinNetParams {
         checkpoints.put( 30800, Sha256Hash.wrap("3a767fc61883f7d5adfd2b07c810ec4b065812dd40aafbda1944f8f792e2c00a"));
         checkpoints.put( 66138, Sha256Hash.wrap("8f4074d04838fb1d0914d46ee35de8b1e069f70df97e207617210469d1ebcf7e"));
         checkpoints.put( 68900, Sha256Hash.wrap("e0bef613116487194c2c823110d9b4d630ccd33d186b9dc12db03c03ae21c958"));
-        checkpoints.put(153216, Sha256Hash.wrap("99b5bc279aa2a6680566dc3815ef444a5d078abedde43614d64009c0ac7caa0d"));
 
         dnsSeeds = new String[] {
                 "dobbscoin.info",
