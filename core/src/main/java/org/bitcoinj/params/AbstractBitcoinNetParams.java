@@ -60,44 +60,19 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
 
     @Override
     public void checkDifficultyTransitions(StoredBlock storedPrev, Block nextBlock, BlockStore blockStore) throws BlockStoreException, VerificationException {
-        // checkState(lock.isHeldByCurrentThread());
-
-    /*
-    enum DiffMode {
-        DIFF_DEFAULT = 0, // Default to invalid 0
-        DIFF_BTC     = 1, // Retarget every x blocks (dobbscoin style)
-        DIFF_KGW     = 2,
-        DIFF_KGW2    = 3,// Retarget using Kimoto Gravity Well
-        DIFF_DGW     = 4,
-        DIFF_DELTA   = 5,
-        DIFF_KGW3    = 6,
-        DIFF_NULL    = 0,// Retarget using Dark Gravity Wave v3
-    };
-    */
 
         int DiffMode = 1;
-       /* if (this.getId().equals(NetworkParameters.ID_TESTNET)) {
-            if (storedPrev.getHeight() + 1 >= 500) { DiffMode = 3; }
-            else if (storedPrev.getHeight() + 1 >= 100) { DiffMode = 5; }
-            else if (storedPrev.getHeight() + 1 >= 20) { DiffMode = 2; }
-            else if (storedPrev.getHeight() + 1 >= 10) { DiffMode = 4; }
-            else { DiffMode = 1; }
-        }*/
 
-        if (storedPrev.getHeight() + 1 >= 68425) { DiffMode = 6; }
+        if (storedPrev.getHeight() + 1 >= 68425) { DiffMode = 4; }
         else if (storedPrev.getHeight() + 1 >= 31597) { DiffMode = 3; }
-        else if (storedPrev.getHeight() + 1 >= 13579) { DiffMode = 5; }
+        else if (storedPrev.getHeight() + 1 >= 13579) { DiffMode = 2; }
         else { DiffMode = 1;}
 
-
-
         if (DiffMode == 1) { BitcoinStyleRetargeting(storedPrev, nextBlock, blockStore); return; }
-
+        else if (DiffMode == 2) { GetNextWorkRequired_V2(storedPrev, nextBlock, blockStore); return; }
         else if (DiffMode == 3) { GetNextWorkRequired_V3(storedPrev, nextBlock, blockStore); return; }
-
-        else if (DiffMode == 5) { GetNextWorkRequired_V2(storedPrev, nextBlock, blockStore); return; }
-        else if (DiffMode == 6) { GetNextWorkRequired_V4(storedPrev, nextBlock, blockStore); return; }
-
+        else if (DiffMode == 4) { GetNextWorkRequired_V4(storedPrev, nextBlock, blockStore); return; }
+        GetNextWorkRequired_V3(storedPrev, nextBlock, blockStore); return; // never reached..
 
     }
 
@@ -155,11 +130,6 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
          newTarget = newTarget.multiply(BigInteger.valueOf(timespan));
          newTarget = newTarget.divide(BigInteger.valueOf(targetTimespan));
 
-         if (newTarget.compareTo(this.getMaxTarget()) > 0) {
-             log.info("Difficulty hit proof of work limit: {}", newTarget.toString(16));
-             newTarget = this.getMaxTarget();
-         }
-
          verifyDifficulty(newTarget, storedPrev, nextBlock);
 
      }
@@ -171,8 +141,6 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
          long retargetTimespan = nTargetTimespan_V3;
          long retargetInterval = nInterval_V3;
          Block BlockCreating = nextBlock;
-
-
 
          // Is this supposed to be a difficulty transition point?
          if ((storedPrev.getHeight() + 1) % retargetInterval != 0) {
@@ -225,23 +193,17 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
          newTarget = newTarget.multiply(BigInteger.valueOf(timespan));
          newTarget = newTarget.divide(BigInteger.valueOf(targetTimespan));
 
-         if (newTarget.compareTo(this.getMaxTarget()) > 0) {
-             log.info("Difficulty hit proof of work limit: {}", newTarget.toString(16));
-             newTarget = this.getMaxTarget();
-         }
-
          verifyDifficulty(newTarget, storedPrev, nextBlock);
      }
+     
      private void GetNextWorkRequired_V4(StoredBlock storedPrev, Block nextBlock, BlockStore blockStore) throws BlockStoreException, VerificationException {
          Block prev = storedPrev.getHeader();
-         long nTargetTimespan_V3 = 2*60 ;
-         long nTargetSpacing_V3 = 2*60;
-         long nInterval_V3 = nTargetTimespan_V3 / nTargetSpacing_V3;
-         long retargetTimespan = nTargetTimespan_V3;
-         long retargetInterval = nInterval_V3;
+         long nTargetTimespan_V4 = 2*60;
+         long nTargetSpacing_V4 = 2*60;
+         long nInterval_V4 = nTargetTimespan_V4 / nTargetSpacing_V4;
+         int retargetTimespan = (int)nTargetTimespan_V4;
+         long retargetInterval = nInterval_V4;
          Block BlockCreating = nextBlock;
-
-
 
          // Is this supposed to be a difficulty transition point?
          if ((storedPrev.getHeight() + 1) % retargetInterval != 0) {
@@ -283,44 +245,27 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
          watch.stop();
          if (watch.elapsed(TimeUnit.MILLISECONDS) > 50)
              log.info("Difficulty transition traversal took {}", watch);
-
+         
          Block blockIntervalAgo = cursor.getHeader();
-         long timespan = (int) (prev.getTimeSeconds() - blockIntervalAgo.getTimeSeconds());
-
-         timespan = retargetTimespan + (timespan -  retargetTimespan)/8;
+         
+         int timespan = (int) (prev.getTimeSeconds() - blockIntervalAgo.getTimeSeconds());
+         timespan = retargetTimespan + (timespan - retargetTimespan)/8;
+         
          // Limit the adjustment step.
          final int targetTimespan = this.getTargetTimespan();
          if (timespan < (retargetTimespan - (retargetTimespan/4)))
-             timespan =(retargetTimespan - (retargetTimespan/4));
+             timespan = (retargetTimespan - (retargetTimespan/4));
          if (timespan > (retargetTimespan + (retargetTimespan/2)))
              timespan = (retargetTimespan + (retargetTimespan/2));
-
+         
          BigInteger newTarget = Utils.decodeCompactBits(prev.getDifficultyTarget());
          newTarget = newTarget.multiply(BigInteger.valueOf(timespan));
          newTarget = newTarget.divide(BigInteger.valueOf(targetTimespan));
 
-         if (newTarget.compareTo(this.getMaxTarget()) > 0) {
-             log.info("Difficulty hit proof of work limit: {}", newTarget.toString(16));
-             newTarget = this.getMaxTarget();
-         }
+         verifyDifficulty(newTarget, storedPrev, nextBlock);
 
-         if (newTarget.compareTo(this.getMaxTarget()) > 0) {
-             log.info("Difficulty hit proof of work limit: {}", newTarget.toString(16));
-             newTarget = this.getMaxTarget();
-         }
-
-         int accuracyBytes = (int) (nextBlock.getDifficultyTarget() >>> 24) - 3;
-         long receivedTargetCompact = nextBlock.getDifficultyTarget();
-
-         // The calculated difficulty is to a higher precision than received, so reduce here.
-         BigInteger mask = BigInteger.valueOf(0xFFFFFFL).shiftLeft(accuracyBytes * 8);
-         newTarget = newTarget.and(mask);
-         long newTargetCompact = Utils.encodeCompactBits(newTarget);// there is no way other then this as far as i know
-
-       //  if (newTargetCompact != receivedTargetCompact)
-        //    throw new VerificationException("Network provided difficulty bits do not match what was calculated: " +
-         //          Long.toHexString(newTargetCompact) + " vs " + Long.toHexString(receivedTargetCompact));
      }
+     
      private void GetNextWorkRequired_V2(StoredBlock storedPrev, Block nextBlock, BlockStore blockStore) throws BlockStoreException, VerificationException {
          final long      	BlocksTargetSpacing			= (long)(10 * 60);
          final long  		TimeDaySeconds				= (long)(60 * 60 * 24);
@@ -422,18 +367,19 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
             newDifficulty = newDifficulty.divide(BigInteger.valueOf(PastRateTargetSeconds));
         }
 
-        if (newDifficulty.compareTo(this.getMaxTarget()) > 0) {
-            log.info("Difficulty hit proof of work limit: {}", newDifficulty.toString(16));
-            newDifficulty = this.getMaxTarget();
-        }
-
-
         verifyDifficulty(newDifficulty, storedPrev, nextBlock);
 
     }
+    
     private void verifyDifficulty(BigInteger calcDiff, StoredBlock storedPrev, Block nextBlock)
     {
 
+        if (calcDiff.compareTo(this.getMaxTarget()) > 0) {
+            log.info("Difficulty hit proof of work limit: {}", calcDiff.toString(16));
+            calcDiff = this.getMaxTarget();
+        }
+
+        /*
         int accuracyBytes = (int) (nextBlock.getDifficultyTarget() >>> 24) - 3;
         BigInteger receivedDifficulty = nextBlock.getDifficultyTargetAsInteger();
 
@@ -453,7 +399,9 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
                   throw new VerificationException("Network provided difficulty bits do not match what was calculated: " +
                            receivedDifficulty.toString(16) + " vs " + calcDiff.toString(16));}
         }
+        */
     }
+    
     @Override
     public Coin getMaxMoney() {
         return MAX_MONEY;
