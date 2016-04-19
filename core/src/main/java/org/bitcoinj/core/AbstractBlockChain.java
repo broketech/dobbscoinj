@@ -407,7 +407,10 @@ public abstract class AbstractBlockChain {
             } else {
                 checkState(lock.isHeldByCurrentThread());
                 // It connects to somewhere on the chain. Not necessarily the top of the best known chain.
-                params.checkDifficultyTransitions(storedPrev, block, blockStore);
+                // Dobbscoin: skip difficulty checks before block 157250
+                if (storedPrev.getHeight() + 1 >= 157250) {
+                    params.checkDifficultyTransitions(storedPrev, block, blockStore);
+                }
                 connectBlock(block, storedPrev, shouldVerifyTransactions(), filteredTxHashList, filteredTxn);
             }
 
