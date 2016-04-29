@@ -63,7 +63,7 @@ public class ExchangeRate implements Serializable {
      * Convert a BTC amount to a coin amount using this exchange rate.
      * @throws ArithmeticException if the converted coin amount is too high or too low.
      */
-    public Fiat coinToBTC(Coin convertCoin, double BitcoinRate) {
+    public Fiat coinToBTC(Coin convertCoin, Double BitcoinRate) {
         // Use BigInteger because it's much easier to maintain full precision without overflowing.
         long btcRate = Double.valueOf(BitcoinRate * Coin.COIN.value).longValue();
         final BigInteger converted = BigInteger.valueOf(convertCoin.value).multiply(BigInteger.valueOf(btcRate))
